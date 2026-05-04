@@ -22,43 +22,46 @@ public class ProductController {
     }
 
     @GetMapping("/no-cache/products/{productId}")
-    public ApiResponse<ProductResponse> getNoCacheProduct(@PathVariable Long productId) {
+    public ApiResponse<ProductResponse> getNoCacheProduct(@PathVariable("productId") Long productId) {
         return measured("no-cache", () -> productService.getNoCacheProduct(productId));
     }
 
     @GetMapping("/local-cache/products/{productId}")
-    public ApiResponse<ProductResponse> getLocalCacheProduct(@PathVariable Long productId) {
+    public ApiResponse<ProductResponse> getLocalCacheProduct(@PathVariable("productId") Long productId) {
         return measured("local-cache", () -> productService.getLocalCacheProduct(productId));
     }
 
     @GetMapping("/ttl-cache/products/{productId}")
-    public ApiResponse<ProductResponse> getTtlCacheProduct(@PathVariable Long productId) {
+    public ApiResponse<ProductResponse> getTtlCacheProduct(@PathVariable("productId") Long productId) {
         return measured("ttl-cache", () -> productService.getTtlCacheProduct(productId));
     }
 
     @GetMapping("/size-limit-cache/products/{productId}")
-    public ApiResponse<ProductResponse> getSizeLimitCacheProduct(@PathVariable Long productId) {
+    public ApiResponse<ProductResponse> getSizeLimitCacheProduct(@PathVariable("productId") Long productId) {
         return measured("size-limit-cache", () -> productService.getSizeLimitCacheProduct(productId));
     }
 
     @GetMapping("/bad-key/products/search")
     public ApiResponse<List<ProductResponse>> searchWithBadKey(
-            @RequestParam ProductCategory category,
-            @RequestParam ProductSort sort
+            @RequestParam("category") ProductCategory category,
+            @RequestParam("sort") ProductSort sort
     ) {
         return measured("bad-key", () -> productService.searchWithBadKey(category, sort));
     }
 
     @GetMapping("/good-key/products/search")
     public ApiResponse<List<ProductResponse>> searchWithGoodKey(
-            @RequestParam ProductCategory category,
-            @RequestParam ProductSort sort
+            @RequestParam("category") ProductCategory category,
+            @RequestParam("sort") ProductSort sort
     ) {
         return measured("good-key", () -> productService.searchWithGoodKey(category, sort));
     }
 
     @PatchMapping("/products/{productId}/price")
-    public ApiResponse<ProductResponse> changePrice(@PathVariable Long productId, @RequestParam int price) {
+    public ApiResponse<ProductResponse> changePrice(
+            @PathVariable("productId") Long productId,
+            @RequestParam("price") int price
+    ) {
         return measured("change-price-with-cache-evict", () -> productService.changePrice(productId, price));
     }
 
