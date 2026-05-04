@@ -26,29 +26,29 @@ public class ProductService {
         return findProductSlowly(productId);
     }
 
-    @Cacheable(cacheNames = CacheConfig.LOCAL_PRODUCTS, key = "#productId")
+    @Cacheable(cacheNames = CacheConfig.LOCAL_PRODUCTS, key = "#p0")
     public ProductResponse getLocalCacheProduct(Long productId) {
         return findProductSlowly(productId);
     }
 
-    @Cacheable(cacheNames = CacheConfig.TTL_PRODUCTS, key = "#productId")
+    @Cacheable(cacheNames = CacheConfig.TTL_PRODUCTS, key = "#p0")
     public ProductResponse getTtlCacheProduct(Long productId) {
         return findProductSlowly(productId);
     }
 
-    @Cacheable(cacheNames = CacheConfig.SIZE_LIMIT_PRODUCTS, key = "#productId")
+    @Cacheable(cacheNames = CacheConfig.SIZE_LIMIT_PRODUCTS, key = "#p0")
     public ProductResponse getSizeLimitCacheProduct(Long productId) {
         return findProductSlowly(productId);
     }
 
-    @Cacheable(cacheNames = CacheConfig.BAD_PRODUCT_SEARCH, key = "#category")
+    @Cacheable(cacheNames = CacheConfig.BAD_PRODUCT_SEARCH, key = "#p0")
     public List<ProductResponse> searchWithBadKey(ProductCategory category, ProductSort sort) {
         log.info("DB search occurred. scenario=bad-key, category={}, sort={}", category, sort);
         sleep(300);
         return sortProducts(productRepository.findByCategory(category), sort);
     }
 
-    @Cacheable(cacheNames = CacheConfig.GOOD_PRODUCT_SEARCH, key = "#category + ':' + #sort")
+    @Cacheable(cacheNames = CacheConfig.GOOD_PRODUCT_SEARCH, key = "#p0 + ':' + #p1")
     public List<ProductResponse> searchWithGoodKey(ProductCategory category, ProductSort sort) {
         log.info("DB search occurred. scenario=good-key, category={}, sort={}", category, sort);
         sleep(300);
