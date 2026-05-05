@@ -1,0 +1,67 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: cache-demo-postgres
+    environment:
+      POSTGRES_DB: cachedemo
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cachedemo"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7
+    container_name: cache-demo-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app1:
+    build: .
+    container_name: cache-demo-app1
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      APP_INSTANCE_ID: app1
+      APP_CACHE_FAIL_OPEN: "true"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cachedemo
+      SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD:
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+    ports:
+      - "8081:8080"
+
+  app2:
+    build: .
+    container_name: cache-demo-app2
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      APP_INSTANCE_ID: app2
+      APP_CACHE_FAIL_OPEN: "true"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cachedemo
+      SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD:
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+    ports:
+      - "8082:8080"
