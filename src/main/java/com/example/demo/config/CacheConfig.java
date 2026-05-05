@@ -2,7 +2,6 @@ package com.example.demo.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +12,7 @@ import java.time.Duration;
 import java.util.List;
 
 @Configuration
-public class CacheConfig implements CachingConfigurer {
+public class CacheConfig {
 
     public static final String LOCAL_PRODUCTS = "localProducts";
     public static final String TTL_PRODUCTS = "ttlProducts";
@@ -33,11 +32,6 @@ public class CacheConfig implements CachingConfigurer {
                 caffeineCache(GOOD_PRODUCT_SEARCH, Duration.ofMinutes(30), 1_000)
         ));
         return cacheManager;
-    }
-
-    @Override
-    public CacheManager cacheManager() {
-        return localCacheManager();
     }
 
     private CaffeineCache caffeineCache(String name, Duration ttl, long maximumSize) {
