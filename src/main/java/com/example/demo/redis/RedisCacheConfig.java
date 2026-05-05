@@ -88,6 +88,8 @@ public class RedisCacheConfig {
 
     @Bean
     public MessageListenerAdapter productCacheEventListenerAdapter(ProductCacheEventSubscriber subscriber) {
-        return new MessageListenerAdapter(subscriber, "handleMessage");
+        MessageListenerAdapter adapter = new MessageListenerAdapter(subscriber, "handleMessage");
+        adapter.setSerializer(new StringRedisSerializer());
+        return adapter;
     }
 }
