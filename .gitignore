@@ -16,3 +16,7 @@ out/
 *.log
 hs_err_pid*
 replay_pid*
+/bin/
+/.classpath
+/.project
+/.settings/
