@@ -3,8 +3,11 @@ package com.example.demo.support;
 import com.example.demo.product.Product;
 import com.example.demo.product.ProductCategory;
 import com.example.demo.product.ProductRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +17,8 @@ import java.util.List;
 
 @Component
 public class DataInitializer implements ApplicationRunner {
+
+    private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
 
     private final ProductRepository productRepository;
 
@@ -25,9 +30,20 @@ public class DataInitializer implements ApplicationRunner {
     @Transactional
     public void run(ApplicationArguments args) {
         if (productRepository.count() > 0) {
+            log.info("Sample products already exist. skip initialization.");
             return;
         }
 
+        try {
+            productRepository.saveAll(createProducts());
+            productRepository.flush();
+            log.info("Sample products initialized.");
+        } catch (DataIntegrityViolationException e) {
+            log.info("Sample products were initialized by another application instance. skip duplicated initialization.");
+        }
+    }
+
+    private List<Product> createProducts() {
         LocalDateTime now = LocalDateTime.now();
         List<Product> products = new ArrayList<>();
         ProductCategory[] categories = ProductCategory.values();
@@ -44,6 +60,6 @@ public class DataInitializer implements ApplicationRunner {
             ));
         }
 
-        productRepository.saveAll(products);
+        return products;
     }
 }
