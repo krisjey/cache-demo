@@ -26,21 +26,9 @@ public class RedisCacheConfig {
     public static final String REDIS_PRODUCTS = "redisProducts";
     public static final String PRODUCT_CACHE_EVENT_CHANNEL = "product-cache-events";
 
-    @Bean("redisObjectMapper")
-    public ObjectMapper redisObjectMapper() {
-        BasicPolymorphicTypeValidator validator = BasicPolymorphicTypeValidator.builder()
-                .allowIfSubType("com.example.demo")
-                .allowIfSubType("java.util")
-                .allowIfSubType("java.time")
-                .build();
-        return new ObjectMapper()
-                .findAndRegisterModules()
-                .activateDefaultTyping(validator, ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
-    }
-
     @Bean("redisCacheManager")
-    public CacheManager redisCacheManager(RedisConnectionFactory connectionFactory, ObjectMapper redisObjectMapper) {
-        GenericJackson2JsonRedisSerializer valueSerializer = new GenericJackson2JsonRedisSerializer(redisObjectMapper);
+    public CacheManager redisCacheManager(RedisConnectionFactory connectionFactory) {
+        GenericJackson2JsonRedisSerializer valueSerializer = new GenericJackson2JsonRedisSerializer(redisObjectMapper());
 
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofSeconds(30))
@@ -57,8 +45,8 @@ public class RedisCacheConfig {
     }
 
     @Bean
-    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory, ObjectMapper redisObjectMapper) {
-        GenericJackson2JsonRedisSerializer valueSerializer = new GenericJackson2JsonRedisSerializer(redisObjectMapper);
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+        GenericJackson2JsonRedisSerializer valueSerializer = new GenericJackson2JsonRedisSerializer(redisObjectMapper());
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
@@ -91,5 +79,16 @@ public class RedisCacheConfig {
         MessageListenerAdapter adapter = new MessageListenerAdapter(subscriber, "handleMessage");
         adapter.setSerializer(new StringRedisSerializer());
         return adapter;
+    }
+
+    private ObjectMapper redisObjectMapper() {
+        BasicPolymorphicTypeValidator validator = BasicPolymorphicTypeValidator.builder()
+                .allowIfSubType("com.example.demo")
+                .allowIfSubType("java.util")
+                .allowIfSubType("java.time")
+                .build();
+        return new ObjectMapper()
+                .findAndRegisterModules()
+                .activateDefaultTyping(validator, ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
     }
 }
