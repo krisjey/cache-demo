@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -66,10 +65,10 @@ public class RedisCacheController {
     }
 
     private long ttlSeconds(String key) {
-        Duration ttl = redisTemplate.getExpire(key);
+        Long ttl = redisTemplate.getExpire(key);
         if (ttl == null) {
             return -2;
         }
-        return ttl.toSeconds();
+        return ttl;
     }
 }
