@@ -3,11 +3,7 @@ package com.example.demo.redis;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CachingConfigurer;
-import org.springframework.cache.interceptor.CacheErrorHandler;
-import org.springframework.cache.interceptor.SimpleCacheErrorHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -25,7 +21,7 @@ import java.time.Duration;
 import java.util.Map;
 
 @Configuration
-public class RedisCacheConfig implements CachingConfigurer {
+public class RedisCacheConfig {
 
     public static final String REDIS_PRODUCTS = "redisProducts";
     public static final String PRODUCT_CACHE_EVENT_CHANNEL = "product-cache-events";
@@ -53,11 +49,9 @@ public class RedisCacheConfig implements CachingConfigurer {
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(valueSerializer))
                 .computePrefixWith(cacheName -> "cache:" + cacheName + "::");
 
-        RedisCacheConfiguration productConfig = defaultConfig.entryTtl(Duration.ofSeconds(30));
-
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(defaultConfig)
-                .withInitialCacheConfigurations(Map.of(REDIS_PRODUCTS, productConfig))
+                .withInitialCacheConfigurations(Map.of(REDIS_PRODUCTS, defaultConfig))
                 .transactionAware()
                 .build();
     }
@@ -95,13 +89,5 @@ public class RedisCacheConfig implements CachingConfigurer {
     @Bean
     public MessageListenerAdapter productCacheEventListenerAdapter(ProductCacheEventSubscriber subscriber) {
         return new MessageListenerAdapter(subscriber, "handleMessage");
-    }
-
-    @Bean
-    public CacheErrorHandler cacheErrorHandler(@Value("${app.cache.fail-open:true}") boolean failOpen) {
-        if (!failOpen) {
-            return new SimpleCacheErrorHandler();
-        }
-        return new LoggingCacheErrorHandler();
     }
 }
