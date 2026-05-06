@@ -22,6 +22,11 @@ public class ProductController {
     }
 
     @GetMapping("/no-cache/products/{productId}")
+    public ApiResponse<ProductResponse> getNoCacheProducts(@PathVariable("productId") Long productId) {
+        return measured("no-cache", () -> productService.getNoCacheProduct(productId));
+    }
+    
+    @GetMapping("/no-cache/product/{productId}")
     public ApiResponse<ProductResponse> getNoCacheProduct(@PathVariable("productId") Long productId) {
         return measured("no-cache", () -> productService.getNoCacheProduct(productId));
     }
