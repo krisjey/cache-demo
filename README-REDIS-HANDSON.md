@@ -20,7 +20,7 @@ EC2 VM
 ```
 
 ## 실행
-
+### 이전 세션에서 실행 완료 함.
 ```bash
 git clone https://github.com/krisjey/cache-demo.git
 cd cache-demo
@@ -54,7 +54,7 @@ docker compose logs -f app1 app2
 | 수동 Redis 캐시 삭제 | `PATCH /api/redis-cache/products/{productId}/evict` |
 | Redis 실습 캐시 전체 삭제 | `DELETE /api/redis-cache/keys` |
 
-## 실습 1. 두 인스턴스의 Redis 캐시 공유 확인
+## 실습 1. 두 인스턴스의 Redis 캐시 공유 확인(10분)
 
 ```bash
 curl http://localhost:8081/api/redis-cache/products/1
@@ -64,11 +64,14 @@ curl http://localhost:8081/api/redis-cache/keys
 
 확인 포인트:
 
-- app1 첫 호출은 DB 조회가 발생합니다.
-- app2 같은 상품 호출은 Redis Cache Hit가 발생합니다.
-- app1/app2가 로컬 메모리가 아니라 Redis 캐시를 공유합니다.
+- app1 첫 호출은 DB 조회가 발생
+- app2 같은 상품 호출은 Redis Cache Hit
+- app1/app2가 Redis 캐시를 공유
+- 그러므로 마지막 API에서 1개의 키만 조회됨.
+- 상품번호 2, 3도 조회 후 키 결과 확인
 
-## 실습 2. Redis Key와 TTL 확인
+## 실습 2. Redis Key와 TTL 확인(15분)
+### TTL이 30초로 짧으므로 터미널 2개 실행 후 확인 필요
 
 ```bash
 curl http://localhost:8081/api/redis-cache/value/products/1
@@ -85,11 +88,10 @@ get cache:redisProducts::1
 
 확인 포인트:
 
-- Redis Key prefix는 `cache:redisProducts::`입니다.
-- TTL은 30초입니다.
-- TTL 만료 후 다시 조회하면 DB 조회가 발생합니다.
+- Redis Key prefix는 `cache:redisProducts::`
+- TTL 만료 후 다시 조회하면 DB 조회가 발생
 
-## 실습 3. DB 변경 후 Stale Cache 재현
+## 실습 3. DB 변경 후 Stale Cache 재현(10분)
 
 ```bash
 curl http://localhost:8081/api/redis-cache/products/1
@@ -100,9 +102,9 @@ curl http://localhost:8081/api/redis-cache/value/products/1
 
 확인 포인트:
 
-- DB의 가격은 변경됩니다.
-- Redis 캐시에는 이전 가격이 남아 있을 수 있습니다.
-- app2 조회 결과가 stale data를 반환할 수 있습니다.
+- DB의 가격 변경
+- Redis 캐시에는 이전 가격
+- app2 조회 결과가 stale data 반환
 
 핵심 메시지:
 
@@ -110,7 +112,7 @@ curl http://localhost:8081/api/redis-cache/value/products/1
 DB 변경은 Redis 캐시 변경을 자동으로 보장하지 않는다.
 ```
 
-## 실습 4. 명시적 Eviction 확인
+## 실습 4. 명시적 Eviction 확인(10분)
 
 ```bash
 curl -X PATCH "http://localhost:8081/api/evict/products/1/price?price=12000"
@@ -122,7 +124,7 @@ curl http://localhost:8082/api/redis-cache/products/1
 - DB 변경 시 `redisProducts` 캐시의 productId=1 entry가 삭제됩니다.
 - 다음 조회 시 DB 재조회 후 새 값이 캐시에 저장됩니다.
 
-## 실습 5. Event 기반 Invalidation 확인
+## 실습 5. Event 기반 Invalidation 확인(10분)
 
 ```bash
 curl http://localhost:8081/api/redis-cache/products/2
@@ -142,7 +144,7 @@ docker compose logs -f app1 app2
 - app1/app2가 이벤트를 수신합니다.
 - 이벤트 수신 후 Redis 캐시를 Evict합니다.
 
-## 실습 6. Redis 장애와 fail-open 확인
+## 실습 6. Redis 장애와 fail-open 확인(20분)
 
 Redis 중지:
 
