@@ -86,9 +86,10 @@ public class RedisCacheConfig {
                 .allowIfSubType("com.example.demo")
                 .allowIfSubType("java.util")
                 .allowIfSubType("java.time")
+                .allowIfSubType("java.lang")
                 .build();
         return new ObjectMapper()
                 .findAndRegisterModules()
-                .activateDefaultTyping(validator, ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
+                .activateDefaultTyping(validator, ObjectMapper.DefaultTyping.EVERYTHING, JsonTypeInfo.As.PROPERTY);
     }
 }
